@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Log In";
+}
+
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true"/>
+<div class="container-SIGNIN">
+    <div class="top-content">
+        <img src="https://s3.cubbit.eu/olostep-test-bucket/and-emili.png" alt="">
+        <p class="heading">Use your Account</p>
+
+    </div>
+    <div class="inputs">
+        <input type="email" id="email" class="input">
+        <label for="email" id="input-label" class="input-label">Email</label>
+
+    </div>
+    <p class="color">This is a mockup authentication page. It is not hooked to any identification provider. You can view the repo on GitHub</p>
+    <div style="height: 15px"></div>
+    <div class="btn-group">
+        <button class="create-btn" onclick="window.open('https://github.com/Zecento/BDL_WEBAPP', '_blank')">View the Repo</button>
+        <button class="next-btn" id="log-in-btn">Log In</button>
+
+    </div>
+</div>
+<script src="~/js/login.js" asp-append-version="true"></script>

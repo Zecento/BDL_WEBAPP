@@ -1,8 +1,56 @@
-﻿@{
+﻿@model IEnumerable<BDL_WEBAPP.Models.Player>
+
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>List of Best Players</h1>
+<br/>
+
+<link rel="stylesheet" href="~/css/main.css" asp-append-version="true"/>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PlayerName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PointsScored)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Assists)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Rebounds)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.PlayerName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PointsScored)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Assists)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rebounds)
+            </td>
+            <td>
+                <div class="like-button">
+                    <button id="heart-button-@item.Id"
+                            data-playerName="@item.PlayerName"
+                            onclick="toggleLike(@item.Id)">Save to Favorites  🤍</button>
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<script src="~/js/main.js" asp-append-version="true"></script>

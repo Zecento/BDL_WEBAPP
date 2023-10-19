@@ -1,0 +1,10 @@
+.like-button {
+    margin: 5px;
+}
+
+#heart-button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
