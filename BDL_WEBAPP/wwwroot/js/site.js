@@ -1,7 +1,4 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-function isLogged() {
+﻿function isLogged() {
     return localStorage.getItem("userID") != null;
 }
 
@@ -24,7 +21,7 @@ function retrieveUserEmail() {
     } else {
         favsBtn.style.display = "block";
         favsBtn.addEventListener("click", function(){
-            window.location.href = "/Home/Favorites?userId=" + retrieveUserId()
+            window.open("/Home/Favorites?userId=" + retrieveUserId(), '_blank');
         });
         logoutBtn.style.display = "block";
         logoutBtn.addEventListener("click", function(){

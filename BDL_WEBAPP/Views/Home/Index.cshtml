@@ -1,28 +1,44 @@
 ﻿@model IEnumerable<BDL_WEBAPP.Models.Player>
 
-
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<h1>List of Best Players</h1>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<h1 id="change-current-year">List of Trendiest Players</h1>
+
+<p id="paragraph-warning-data" style="display: none">The loaded data only refers to games played starting from this date: <span id="date-last-fetched"> </span>. If you want to calculate all the stats, click "Load All". It may take a while to fetch all the stats (7/8 minutes). If you want to calculate all the current season stats of a specific player, click the "TOT.STATS" button near the player.</p>
+<button type="button" id="load-all-stats" class="btn btn-primary" style="display: none">Load All Stats</button>
+
+<br id="loader-separator-1"/>
+<button class="buttonload" id="loading-status">
+    <i class="fa fa-refresh fa-spin"></i><a style="margin-left: 3px" id="loading-status-text">  Loading Players data...</a>
+</button>
+<br id="loader-separator-2"/>
 <br/>
 
 <link rel="stylesheet" href="~/css/main.css" asp-append-version="true"/>
-<table class="table">
+<table class="table" id="stats-table">
     <thead>
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.PlayerName)
+            Player Name
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PointsScored)
+            Points Scored
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Assists)
+            Assists
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Rebounds)
+            Rebounds
+        </th>
+        <th>
+            Fetch Total Stats
         </th>
         <th></th>
     </tr>
@@ -30,17 +46,24 @@
     <tbody>
     @foreach (var item in Model) {
         <tr>
-            <td>
+            <td id="player-name-table-row-@item.Id">
                 @Html.DisplayFor(modelItem => item.PlayerName)
             </td>
-            <td>
+            <td id="points-scored-table-row-@item.Id">
                 @Html.DisplayFor(modelItem => item.PointsScored)
             </td>
-            <td>
+            <td id="assists-table-row-@item.Id">
                 @Html.DisplayFor(modelItem => item.Assists)
             </td>
-            <td>
+            <td id="rebounds-table-row-@item.Id">
                 @Html.DisplayFor(modelItem => item.Rebounds)
+            </td>
+            <td>
+                <div class="like-button">
+                    <button id="stat-season-@item.Id"
+                            data-playerName="@item.PlayerName"
+                            onclick="totalStats(@item.Id)">TOT.STATS</button>
+                </div>
             </td>
             <td>
                 <div class="like-button">
@@ -50,7 +73,79 @@
                 </div>
             </td>
         </tr>
+        // at the last item, add a hidden INPUT to store the total number of pages
+        if(item == Model.Last())
+        {
+            // hidden INPUT
+            <input id="totalPages" type="hidden" value="@item.CurrentPage" />
+        }
     }
     </tbody>
 </table>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-data-player" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title-label">All-Season stats for...</h5>
+        <button type="button" class="close" data-dismiss="modal" id="close-modal-header" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <div class="modal-body">
+            <table class="table" id="stats-table-modal" style="display: none">
+                <thead>
+                <tr>
+                    <th>
+                        Points Scored
+                    </th>
+                    <th>
+                        Assists
+                    </th>
+                    <th>
+                        Rebounds
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="points-scored-modal">
+                    </td>
+                    <td id="assists-modal">
+                    </td>
+                    <td id="rebounds-modal">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="buttonload" id="loading-stats-player">
+              <i class="fa fa-spinner fa-spin"></i> Loading Stats...
+            </button>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close-modal" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="~/js/main.js" asp-append-version="true"></script>
+<script src="~/js/statsPlayer.js" asp-append-version="true"></script>
+<script>
+// insert in playersInfo map
+@foreach (var item in Model)
+{
+    <text>
+    playersInfoMap.set(@item.Id, {
+        id: '@item.Id',
+        playerName: '@item.PlayerName',
+        pointsScored: parseInt('@item.PointsScored'),
+        assists: parseInt('@item.Assists'),
+        rebounds: parseInt('@item.Rebounds'),
+        currentPage: parseInt('@item.CurrentPage')
+    });
+    </text>
+}
+
+</script>

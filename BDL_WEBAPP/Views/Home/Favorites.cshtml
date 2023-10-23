@@ -8,18 +8,25 @@
 <h1>Your favorite players</h1>
 <br/>
 
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="~/css/main.css" asp-append-version="true"/>
 <table class="table">
     <thead>
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.PlayerId)
+            Player ID
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PlayerFirstName)
+            Player First Name
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PlayerLastName)
+            Player Last Name
+        </th>
+        <th>
+            Fetch Total Stats
         </th>
         <th></th>
     </tr>
@@ -37,6 +44,13 @@
                 @Html.DisplayFor(modelItem => item.PlayerLastName)
             </td>
             <td>
+                <div class="like-button">
+                    <button id="stat-season-@item.Id"
+                            data-playerName="@item.PlayerFirstName @item.PlayerLastName"
+                            onclick="totalStats(@item.PlayerId)">TOT.STATS</button>
+                </div>
+            </td>
+            <td>
                 <div class="remove-button">
                     <button id="remove-button-@item.Id"
                             data-playerFirstName="@item.PlayerFirstName"
@@ -48,4 +62,52 @@
     }
     </tbody>
 </table>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-data-player" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title-label">All-Season stats for...</h5>
+        <button type="button" class="close" data-dismiss="modal" id="close-modal-header" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <div class="modal-body">
+            <table class="table" id="stats-table-modal" style="display: none">
+                <thead>
+                <tr>
+                    <th>
+                        Points Scored
+                    </th>
+                    <th>
+                        Assists
+                    </th>
+                    <th>
+                        Rebounds
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="points-scored-modal">
+                    </td>
+                    <td id="assists-modal">
+                    </td>
+                    <td id="rebounds-modal">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="buttonload" id="loading-stats-player">
+              <i class="fa fa-spinner fa-spin"></i> Loading Stats...
+            </button>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close-modal" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="~/js/main.js" asp-append-version="true"></script>
+<script src="~/js/statsPlayer.js" asp-append-version="true"></script>

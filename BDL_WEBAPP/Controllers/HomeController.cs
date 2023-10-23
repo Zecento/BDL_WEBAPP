@@ -35,12 +35,30 @@ public class HomeController : Controller
         
         var players = new List<Player>();
         // append players to list after having hit the endpoint
-        // https://www.balldontlie.io/api/v1/stats?seasons[]=2022&seasons[]=2023&postseason=true
         using (HttpClient client = new HttpClient())
         {
-            int currentYear = DateTime.Now.Year;
-            int previousYear = currentYear - 1;
-            string apiUrl = "https://www.balldontlie.io/api/v1/stats?seasons[]=" + previousYear + "&seasons[]=" + currentYear + "&postseason=true&per_page=100";
+            int previousYear = DateTime.Now.Year - 1;
+            // let's pick a random page number that is high enough to only get the meta object
+            // we will use this object to get the total number of pages.
+            // TEST LATENCY: It doesn't actually make a difference, because the latency is the same,
+            // so we could just as well use page 1.
+            
+            string apiUrlGetPage = "https://www.balldontlie.io/api/v1/stats?seasons[]=" + previousYear +
+                                   "&per_page=100&page=999999";
+            HttpResponseMessage responseGetPage = await client.GetAsync(apiUrlGetPage);
+            if (!responseGetPage.IsSuccessStatusCode) return View(players);
+            // extract the meta object
+            string responseDataGetPage = await responseGetPage.Content.ReadAsStringAsync();
+            JObject jsonObjectGetPage = JObject.Parse(responseDataGetPage);
+            JToken meta = jsonObjectGetPage["meta"]!;
+            // extract the total number of pages
+            int pageToLoad = meta["total_pages"]!.ToObject<int>();
+        
+
+            // get the last page
+            string apiUrl = "https://www.balldontlie.io/api/v1/stats?seasons[]=" + previousYear +
+                            "&per_page=100&page=" + pageToLoad;
+            
             HttpResponseMessage response = await client.GetAsync(apiUrl);
             if (response.IsSuccessStatusCode)
             {
@@ -49,14 +67,9 @@ public class HomeController : Controller
 
                 // Extract the players who scored the highest number of points in the current season
                 JToken[] topScorers = jsonObject["data"]!.Children().ToArray();
-                
+
                 foreach (var scorer in topScorers)
                 {
-                    // if points scored !== 0 then add to list
-                    // "the highest number of points in the current season."
-                    // It's a relative constraint...
-                    if (scorer["pts"]!.ToObject<int>() != 0)
-                    {
                         players.Add(new Player
                         {
                             Id = scorer["player"]?["id"]?.ToObject<int>(),
@@ -64,11 +77,25 @@ public class HomeController : Controller
                             PointsScored = scorer["pts"]!.ToObject<int>(),
                             Assists = scorer["ast"]!.ToObject<int>(),
                             Rebounds = scorer["reb"]!.ToObject<int>(),
-                            FieldGoalPercentage = scorer["fg_pct"]!.ToObject<double>()
+                            CurrentPage = pageToLoad,
+                            GameDate = scorer["game"]?["date"]?.ToObject<string>()?.Split("T")[0]
                         });
-                    }
                 }
-                // sort the list by points scored
+                // sum together the points scored by each player if two have the same id
+                
+                players = players.GroupBy(p => p.Id)
+                    .Select(g => new Player
+                    {
+                        Id = g.Key,
+                        PlayerName = g.First().PlayerName,
+                        PointsScored = g.Sum(p => p.PointsScored),
+                        Assists = g.Sum(p => p.Assists),
+                        Rebounds = g.Sum(p => p.Rebounds),
+                        CurrentPage = pageToLoad,
+                        GameDate = g.First().GameDate
+                    }).ToList();
+
+                // sort the list by points scored (so far. We still have to calculate the total points scored)
                 players.Sort((x, y) => y.PointsScored.CompareTo(x.PointsScored));
             }
             else
@@ -81,9 +108,11 @@ public class HomeController : Controller
                     PointsScored = 0,
                     Assists = 0,
                     Rebounds = 0,
-                    FieldGoalPercentage = 0
+                    CurrentPage = pageToLoad,
+                    GameDate = "Error"
                 });
             }
+            
         }
         return await Task.FromResult<IActionResult>(View(players));
     }

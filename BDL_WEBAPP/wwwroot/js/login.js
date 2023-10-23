@@ -6,8 +6,7 @@ function saveLogin(userID, userEmail) {
 function createUser(email){
     return new Promise((resolve, reject) => {
         try{
-            const port = window.location.port;
-            const endpoint = 'http://localhost:' + port + '/api/users';
+            const endpoint = '/api/users';
 
             const options = {
                 method: 'POST',
